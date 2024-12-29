@@ -1,0 +1,17 @@
+[package]
+name = "running_light"
+version = "0.1.0"
+authors = ["申少峰 <14552265+shen-shaofeng@user.noreply.gitee.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+esp-hal = { version = "0.22.0", features = ["esp32"] }
+esp-backtrace = { version = "0.14.2", features = [
+    "esp32",
+    "panic-handler",
+    "exception-handler",
+    "println",
+] }
+esp-println = { version = "0.12.0", features = ["esp32"] }
+
