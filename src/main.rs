@@ -2,10 +2,8 @@
 //! 
 //! This example demonstrates a LED chasing/sequencing effect using multiple GPIO pins.
 //! Hardware requirements:
-//! - 8 LEDs connected to GPIO pins (16, 17, 18, 19, 23, 5, 2, 22)
-//! 
-//! The LEDs will light up in sequence, creating a "running light" effect
-//! with a 500ms interval between each transition.
+//! - 8 LEDs connected to GPIO pins (17, 18, 19, 23, 5, 2, 22)
+
 
 #![no_std]
 #![no_main]
@@ -13,22 +11,23 @@
 use esp_backtrace as _;
 use esp_hal::{
     delay::Delay,
-    gpio::{Level, Output},
+    gpio::{Level, Output, Input, Pull},
     prelude::*,
 };
 use esp_println::println;
 
 // 常量命名
-const LED_COUNT: usize = 8;
+const LED_COUNT: usize = 7;
 const DELAY_MS: u32 = 500;
 
 #[entry]
 fn main() -> ! {
     let peripherals = esp_hal::init(esp_hal::Config::default());
     
-    // 数组命名
+    // 初始化重置按钮
+    let reset_button = Input::new(peripherals.GPIO16, Pull::Up);
+    
     let mut running_leds = [
-        Output::new(peripherals.GPIO16, Level::Low),
         Output::new(peripherals.GPIO17, Level::Low),
         Output::new(peripherals.GPIO18, Level::Low),
         Output::new(peripherals.GPIO19, Level::Low),
@@ -40,17 +39,31 @@ fn main() -> ! {
     
     let delay = Delay::new();
     
-    // 主循环命名
-    run_led_sequence(&mut running_leds, &delay);
+    // 传入重置按钮
+    run_led_sequence(&mut running_leds, &reset_button, &delay);
 }
 
-// 功能函数命名
-fn run_led_sequence(leds: &mut [Output], delay: &Delay) -> ! {
+fn run_led_sequence(leds: &mut [Output], reset_button: &Input, delay: &Delay) -> ! {
+    let mut current_led = 0;  // 跟踪当前 LED 位置
+    
     loop {
-        for (led_index, led) in leds.iter_mut().enumerate() {
-            led.set_high();
-            delay.delay_millis(DELAY_MS);
-            led.set_low();
+        // 检查重置按钮
+        if reset_button.is_low() {  // 按钮按下时为低电平
+            println!("重置按钮被按下！");
+            current_led = 0;  // 重置 LED 位置
+            // 等待按钮释放
+            while reset_button.is_low() {
+                delay.delay_millis(10);  // 防抖
+            }
+            continue;  // 从头开始新的循环
         }
+
+        // LED 控制逻辑
+        leds[current_led].set_high();
+        delay.delay_millis(DELAY_MS);
+        leds[current_led].set_low();
+        
+        // 更新 LED 位置
+        current_led = (current_led + 1) % LED_COUNT;
     }
 }
