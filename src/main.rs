@@ -19,7 +19,6 @@ use esp_hal::{
 use esp_println::println;
 
 // 常量命名
-const LED_COUNT: usize = 8;
 const DELAY_MS: u32 = 500;
 
 #[entry]
