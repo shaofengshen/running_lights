@@ -12,43 +12,26 @@
 
 use esp_backtrace as _;
 use esp_hal::{
-    delay::Delay,
-    gpio::{Level, Output},
+    gpio::{Input, Level, Output, Pull},
     prelude::*,
 };
 use esp_println::println;
 
-// 常量命名
-const DELAY_MS: u32 = 500;
-
 #[entry]
 fn main() -> ! {
     let peripherals = esp_hal::init(esp_hal::Config::default());
-    
-    // 数组命名
-    let mut running_leds = [
-        Output::new(peripherals.GPIO16, Level::Low),
-        Output::new(peripherals.GPIO17, Level::Low),
-        Output::new(peripherals.GPIO18, Level::Low),
-        Output::new(peripherals.GPIO19, Level::Low),
-        Output::new(peripherals.GPIO23, Level::Low),
-        Output::new(peripherals.GPIO5, Level::Low),
-        Output::new(peripherals.GPIO2, Level::Low),
-        Output::new(peripherals.GPIO22, Level::Low),
-    ];
-    
-    let delay = Delay::new();
-    
-    // 主循环命名
-    run_led_sequence(&mut running_leds, &delay);
-}
 
-// 功能函数命名
-fn run_led_sequence(leds: &mut [Output], delay: &Delay) -> ! {
+    println!("Hello world!");
+
+    // Set GPIO7 as an output, and set its state high initially.
+    let mut led = Output::new(peripherals.GPIO17, Level::Low);
+    let button = Input::new(peripherals.GPIO16, Pull::Up);
+
+    // Check the button state and set the LED state accordingly.
     loop {
-        for (led_index, led) in leds.iter_mut().enumerate() {
+        if button.is_high() {
             led.set_high();
-            delay.delay_millis(DELAY_MS);
+        } else {
             led.set_low();
         }
     }
