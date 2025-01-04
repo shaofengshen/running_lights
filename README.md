@@ -7,6 +7,9 @@
 - 主控：ESP32
 - 外设：LED灯
 
+## 软件实现方式
+- 使用Rust语言，no_std模式
+
 ## 许可证
 详见 [LICENSE](LICENSE) 文件。
 
